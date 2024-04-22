@@ -5,7 +5,7 @@
 # - BL(GRS80, WGS84, ew. Krasowski) -> 1992 
 
 from math import sin, cos, sqrt, atan, atan2, degrees, radians
-
+import numpy as np
 class Transformacje:
    def __init__(self, model):
         """
@@ -32,3 +32,127 @@ class Transformacje:
         self.e = sqrt(self.a**2 - self.b**2)/self.a 
         self.e2 = self.e**2
         
+        
+        def hirvonen(X, Y, Z, self):
+            l = np.arctan2(Y, X)
+            p = np.sqrt(X**2 + Y**2)
+            f = np.arctan(Z / (p * (1 -self.e2)))
+            while True:
+                N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
+                h = p / np.cos(f) - N
+                fs = f
+                f = np.arctan(Z / (p * (1 - (self.e2 * (N / (N + h))))))
+                if np.abs(fs - f) < (0.000001/206265):
+                    break
+            return(f, l, h)
+        
+        def flh2xyz(f, l, h, self):
+            N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
+            X = (N * np.cos(f)+h) * np.cos(l)
+            Y = (N * np.cos(f)+h) * np.sin(l)
+            Z = ((N * (1 - self.e2)) + h) * np.sin(f)
+            return(X, Y, Z)
+        
+        def pl1992(f, l, self):
+        
+            l0 = np.deg2rad(19)
+            m = 0.9993
+            N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
+        
+            b2 = self.a**2*(1-self.e2)
+            ep2 = (self.a**2-b2)/b2
+        
+            delta_l = l - l0
+            t = np.tan(f)
+            ni2 = ep2*(np.cos(f)**2)
+            A0 = 1 - (self.e2/4)-(3*self.e2**2/64)-(5*self.e2**3/256)
+            A2 = (3/8)*(self.e2+(self.e2**2/4)+(15*self.e2**3/128))
+            A4 = (15/256)*(self.e2**2+((3*self.e2**3)/4))
+            A6 = (35*self.e2**3)/3072
+        
+            sigma = self.a * (A0*f-A2*np.sin(2*f)+A4*np.sin(4*f)-A6*np.sin(6*f))
+        
+        
+            xgk = sigma + (((delta_l**2/2)*N*np.sin(f)*np.cos(f)) * (1 + ((delta_l**2/12)*(np.cos(f)**2)*(5 - t**2 +
+                           9*ni2 + 4*ni2**2)) + ((delta_l**4/360)*(np.cos(f)**4)*(61 - 58*t**2 + t**4 + 270*ni2 - 330*ni2*t**2))))
+        
+            ygk = (delta_l * N * np.cos(f)) * (1 + ((delta_l**2/6) * (np.cos(f)**2) * (1 - t**2 + ni2)) +
+                                               (((delta_l**4/120)*(np.cos(f)**4)) * (5 - (18*t**2) + t**4 + (14 * ni2) - (58*ni2*t**2))))
+        
+            x92 = xgk * m - 5300000
+            y92 = ygk * m + 500000
+            return x92, y92
+        
+        def pl2000(self, f, l):
+        
+            m = 0.999923
+            l0 = 0
+            strefa = 0
+            if l > np.deg2rad(13.5) and l < np.deg2rad(16.5):
+                strefa = 5
+                l0 = np.deg2rad(15)
+            elif l > np.deg2rad(16.5) and l < np.deg2rad(19.5):
+                strefa = 6
+                l0 = np.deg2rad(18)
+            elif l > np.deg2rad(19.5) and l < np.deg2rad(22.5):
+                strefa = 7
+                l0 = np.deg2rad(21)
+            elif l > np.deg2rad(22.5) and l < np.deg2rad(25.5):
+                strefa = 8
+                l0 = np.deg2rad(24)
+            else:
+                print("Punkt poza strefami odwzorowawczymi układu PL-2000")
+        
+            b2 = self.a**2*(1-self.e2)
+            ep2 = (self.a**2-b2)/b2
+          
+            delta_l = l - l0
+            t = np.tan(f)
+            ni2 = ep2*(np.cos(f)**2)
+            N = self.a/np.sqrt(1-self.e2 * np.sin(f)**2)
+        
+         
+            A0 = 1 - (self.e2/4)-(3*self.e2**2/64)-(5*self.e2**3/256)
+            A2 = (3/8)*(self.e2+(self.e2**2/4)+(15*self.e2**3/128))
+            A4 = (15/256)*(self.e2**2+((3*self.e2**3)/4))
+            A6 = (35*self.self.e2**3)/3072
+        
+            sigma = self.a * (A0*f-A2*np.sin(2*f)+A4*np.sin(4*f)-A6*np.sin(6*f))
+        
+            xgk = sigma + (((delta_l**2/2)*N*np.sin(f)*np.cos(f)) * (1 + ((delta_l**2/12)*(np.cos(f)**2)*(5 - t**2 +
+                           9*ni2 + 4*ni2**2)) + ((delta_l**4/360)*(np.cos(f)**4)*(61 - 58*t**2 + t**4 + 270*ni2 - 330*ni2*t**2))))
+        
+            ygk = (delta_l * N * np.cos(f)) * (1 + ((delta_l**2/6) * (np.cos(f)**2) * (1 - t**2 + ni2)) +
+                                               (((delta_l**4/120)*(np.cos(f)**4)) * (5 - (18*t**2) + t**4 + (14 * ni2) - (58*ni2*t**2))))
+        
+            x2000 = xgk * m
+            y2000 = ygk*m + (strefa * 1000000) + 500000
+            return x2000, y2000
+        
+        
+        def Rneu(fa,la):
+            R = np.array([[-np.sin(fa)*np.cos(la) , -np.sin(la) , np.cos(fa)*np.cos(la)],
+                          [-np.sin(fa)*np.sin(la) , np.cos(la) , np.cos(fa)*np.sin(la)],
+                          [np.cos(fa) , 0 , np.sin(fa)]])
+            return(R)
+        def xyz2neup(self, X, Y, Z, X0, Y0, Z0):
+                neu = []
+                p = np.sqrt(X0**2 + Y0**2)
+                fi = np.arctan(Z0 / (p*(1 - self.e2)))
+                while True:
+                    N = self.a/np.sqrt(1-self.e2 * np.sin(fi)**2)
+                    h = (p / np.cos(fi)) - N
+                    fi_poprzednia = fi
+                    fi = np.arctan((Z0 / p)/(1-((N * self.e2)/(N + h))))
+                    if abs(fi_poprzednia - fi) < (0.000001/206265):
+                        break 
+                N = self.a/np.sqrt(1-self.e2 * np.sin(fi)**2)
+                h = p/np.cos(fi) - N
+                lam = np.arctan(Y0 / X0)
+                
+                R_neu = self.Rneu(fi, lam)
+                X_sr = [X - X0, Y - Y0, Z - Z0] 
+                X_neu = R_neu.T@X_sr
+                neu.append(X_neu)
+                    
+                return(neu)
