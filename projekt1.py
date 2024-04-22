@@ -6,6 +6,8 @@
 
 from math import sin, cos, sqrt, atan, atan2, degrees, radians
 import numpy as np
+from argparse import ArgumentParser
+
 class Transformacje:
    def __init__(self, model):
         """
@@ -156,3 +158,37 @@ class Transformacje:
                 neu.append(X_neu)
                     
                 return(neu)
+
+# Otwórz plik tekstowy
+def plik(sciezka):
+    with open(sciezka, 'r') as file:
+        lines = file.readlines()
+
+    lists = {"1": [], "2": [], "3": []}
+
+    for line in lines:
+        parts = line.split()
+        lists["1"].append(float(parts[0]))
+        lists["2"].append(float(parts[1]))
+        lists["3"].append(float(parts[2]))
+    return lists
+
+
+if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser.add_argument('-wsp', type=str)
+    parser.add_argument('-el', type=str)
+    parser.add_argument('-t', type=str)
+    args = parser.parse_args()
+    
+
+    if args.el==None:
+                args.el = input(str('Na jakiej elpisoidzie wykonywane będą obliczenia?: '))
+    if args.wsp==None:
+                args.wsp = plik(input(str('Wklej ścieżkę do pliku txt z danymi: ')))
+    if args.t==None:
+                args.t = input(str('Jaką transformację chcesz wykonać?: '))
+
+x = args.wsp["1"]
+y = args.wsp["2"]
+z = args.wsp["3"]

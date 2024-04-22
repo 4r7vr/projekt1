@@ -1,0 +1,48 @@
+Program/skrypt musi:
+- być napisany jako klasa zawierająca metody implementujące poszczególne transformacje
+- posiadać strukturę, w której definicje są oddzielone od wywołań klauzulą 'if __name__ == "__main__"'
+- implementować następujące trnsformacje (bez analizy dokładnościowej):
+    - XYZ (geocentryczne) -> BLH (elipsoidalne fi, lambda, h) - pomoce naukowe: http://www.asgeupos.pl/index.php?wpg_type=tech_transf&sub=xyz_blh, https://ewmapa.pl/dane/wytyczne_g-1.10.pdf, http://www.geonet.net.pl/images/2002_12_uklady_wspolrz.pdf
+    - BLH -> XYZ - pomoce naukowe: http://www.asgeupos.pl/index.php?wpg_type=tech_transf&sub=xyz_blh, https://ewmapa.pl/dane/wytyczne_g-1.10.pdf, http://www.geonet.net.pl/images/2002_12_uklady_wspolrz.pdf
+    - XYZ -> NEUp (topocentryczne northing, easting, up) - pomoce naukowe: https://notatek.pl/transformacja-wspolrzednych-geocentrycznych-odbiornika-do-wspolrzednych-topocentrycznych
+    - BL(GRS80, WGS84, ew. Krasowski) -> 2000 - pomoce naukowe: http://www.geonet.net.pl/images/2002_12_uklady_wspolrz.pdf, https://ewmapa.pl/dane/wytyczne_g-1.10.pdf, http://www.asgeupos.pl/index.php?wpg_type=tech_transf&sub=xyz_blh
+    - BL(GRS80, WGS84, ew. Krasowski) -> 1992 - pomoce naukowe: http://www.geonet.net.pl/images/2002_12_uklady_wspolrz.pdf, https://ewmapa.pl/dane/wytyczne_g-1.10.pdf, http://www.asgeupos.pl/index.php?wpg_type=tech_transf&sub=xyz_blh
+- umożliwiać podawanie argumentów przy wywołaniu (za pomocą zmiennej sys.argv ewentualnie dla chętnych za pomącą biblioteki argparse)
+- potrafić transformować wiele współrzędnych zapisanych w pliku tekstowym przekazywanym do programu jako argument i tworzyć plik wynikowy
+- obsłużyć przypadki gdy użytkownik wprowadzi niepoprawne wartości (np. nieobsługiwaną elipsoidę)
+- być napisany w parach i wersjonowany z użyciem git-a oraz hostowany na githubie w publicznym repozytorium
+- udokumentowany, czyli opisany na githubie w pliku README.md, który ma zawierać następujące informacje:
+    - do czego służy program i jaką funkcjonalność oferuje (transformacja XYZ -> BLH, transformacja BLH -> XYZ, jakie elipsidy są obsługiwane, ...)
+    - jakie wymagania trzeba spełnić, by program działał na danym komputerze (np. trzeba mieć pythona w wesji takiej-a-takiej, 
+      zainstalowaną bibliotekę taką-a-taką, ...)
+    - dla jakiego systemu operacyjnego został napisany program 
+    - jak go używać wraz z kilkoma przykładami wywołań obrazującymi jak z niego korzystać (w tym opis struktury danych wejściowych i wyjściowych) 
+      oraz rezultatami tych wywołań (przykładowe wywołania powinny za input brać plik z przykładowymi danymi)
+    - znane błędy i nietypowe zachowania programu, które nie zostały jeszcze naprawione
+
+Sprawozdanie z projektu (czyli dokument opisujący na czym polegało ćwiczenie) musi:
+- być napisane w latex na templatce podanej na pierwszych zajęciach
+- zawierać następujące rozdziały:
+    - cel ćwiczenia, czyli "stworzenie skryptu implementującego takie-a-takie transformacje"
+    - wykorzystane narzędzia i materiały potrzebne do replikacji ćwiczenia (python, spyder, jaki system operacyjny, ...)
+    - przebieg ćwiczenia bez dokumentacji programu (ta ma być na githubie) czyli: zrobiliśmy to-i-to, potem to-i-to z wykorzystaniem wzorów/algorytmów 
+      które znaleźliśmy tu-i-tu, a na koniec sprawdziliśmy za pomocą programu takiego-a-takiego czy nasze wyniki są poprawne. Ponadto powinny zostać 
+      zawarte inne istotne informacje tj. dlaczego zdecydowaiśmy się na taką a nie inną implementację jakiegoś algorytmu (np."postanowiliśmy wykorzystać 
+      bibliotekę numpy do obliczeń macierzowych aby uzyskać precyzyjniejsze wyniki i schludniejszy kod w zamian za trochę bardziej złożony proces 
+      instalacji - użytkownik musi zainstalować bibliotekę na swoin komputerze" albo "algorytmy wykorzystujące obliczenia macierzowe zaimplementowaliśmy 
+      wykorzystując jedynie bibliotekę standardową pythona aby użytkownik nie musiał instalować dodatkowych bibliotek, jednocześnie poświęcając nieco 
+      szybkość i dokładność obliczeń oraz schludność kodu")
+    - podsumowanie zawierające:
+        - rezultat, czyli link do repozytorium github, z którego można pobrać program
+        - umiejętności nabyte w trakcie wykonywania ćwiczenia:
+            - pisanie kodu obiektowego w Pythonie
+            - implementowanie algorytmów pochodzących ze źródeł zewnętrznych (tj. takich, których nie wymyśliliśmy sami)
+            - tworzenie dokumentów w latex
+            - współpraca w wieloosobowym zespole z wykorzystaniem systemu kontroli wersji git
+            - tworzenie narzędzi w interfejsie tekstowym (cli) potrafiących przyjmować argumenty przy wywołaniu
+            - pisanie użytecznej dokumentacji
+        - spostrzeżenia i trudności napotkane w trakcie wykonywania ćwiczenia wraz ze sposobem ich rozwiązania/ominięcia lub informacją, 
+          że nie udało się ich rozwiązać/ominąć (chodzi o konkrety np. spostrzeżenie "wywołanie skryptu w windows cmd z dowolnego folderu 
+          komendą taką-a-taką działa bez problemu, ale w PowerShell otrzymujemy komunikat taki-a-taki i nie udało nam się tego zagadnienia wyjaśnić" 
+          jest ok ale "python jest bardzo trudny" już mniej)
+    - bibliografia
