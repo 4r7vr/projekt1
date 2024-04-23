@@ -7,6 +7,19 @@
 from math import sin, cos, sqrt, atan, atan2, degrees, radians
 import numpy as np
 from argparse import ArgumentParser
+# Otwórz plik tekstowy
+def plik(sciezka):
+    with open(sciezka, 'r') as file:
+        lines = file.readlines()
+
+    lists = {"1": [], "2": [], "3": []}
+
+    for line in lines:
+        parts = line.split()
+        lists["1"].append(float(parts[0]))
+        lists["2"].append(float(parts[1]))
+        lists["3"].append(float(parts[2]))
+    return lists
 
 class Transformacje:
    def __init__(self, model):
@@ -22,7 +35,7 @@ class Transformacje:
         if model == "wgs84":
             self.a = 6378137.0 
             self.b = 6356752.31424518 
-        elif model == "grs80":
+        elif model == "GRS80":
             self.a = 6378137.0
             self.b = 6356752.31414036
         elif model == "krasowski":
@@ -35,27 +48,38 @@ class Transformacje:
         self.e2 = self.e**2
         
         
-        def hirvonen(X, Y, Z, self):
-            l = np.arctan2(Y, X)
-            p = np.sqrt(X**2 + Y**2)
-            f = np.arctan(Z / (p * (1 -self.e2)))
+   def hirvonen(self, X, Y, Z):
+        fi_list = []
+        l_list = []
+        h_list = []
+        
+        for x, y, z in zip(X, Y, Z):
+            l = np.arctan2(y, x)
+            p = np.sqrt(x**2 + y**2)
+            f = np.arctan(z / (p * (1 - self.e2)))
+            
             while True:
                 N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
                 h = p / np.cos(f) - N
                 fs = f
-                f = np.arctan(Z / (p * (1 - (self.e2 * (N / (N + h))))))
+                f = np.arctan(z / (p * (1 - (self.e2 * (N / (N + h))))))
                 if np.abs(fs - f) < (0.000001/206265):
                     break
-            return(f, l, h)
+    
+            fi_list.append(f)
+            l_list.append(l)
+            h_list.append(h)
+    
+        return fi_list, l_list, h_list
         
-        def flh2xyz(f, l, h, self):
+   def flh2xyz(f, l, h, self):
             N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
             X = (N * np.cos(f)+h) * np.cos(l)
             Y = (N * np.cos(f)+h) * np.sin(l)
             Z = ((N * (1 - self.e2)) + h) * np.sin(f)
             return(X, Y, Z)
         
-        def pl1992(f, l, self):
+   def pl1992(f, l, self):
         
             l0 = np.deg2rad(19)
             m = 0.9993
@@ -85,7 +109,7 @@ class Transformacje:
             y92 = ygk * m + 500000
             return x92, y92
         
-        def pl2000(self, f, l):
+   def pl2000(self, f, l):
         
             m = 0.999923
             l0 = 0
@@ -132,12 +156,12 @@ class Transformacje:
             return x2000, y2000
         
         
-        def Rneu(fa,la):
+   def Rneu(fa,la):
             R = np.array([[-np.sin(fa)*np.cos(la) , -np.sin(la) , np.cos(fa)*np.cos(la)],
                           [-np.sin(fa)*np.sin(la) , np.cos(la) , np.cos(fa)*np.sin(la)],
                           [np.cos(fa) , 0 , np.sin(fa)]])
             return(R)
-        def xyz2neup(self, X, Y, Z, X0, Y0, Z0):
+   def xyz2neup(self, X, Y, Z, X0, Y0, Z0):
                 neu = []
                 p = np.sqrt(X0**2 + Y0**2)
                 fi = np.arctan(Z0 / (p*(1 - self.e2)))
@@ -158,20 +182,17 @@ class Transformacje:
                 neu.append(X_neu)
                     
                 return(neu)
+   def licz(self, plik_input, trans):
+    dane = plik(plik_input)  # Wczytanie danych z pliku
+    X = dane["1"]
+    Y = dane["2"]
+    Z = dane["3"]
 
-# Otwórz plik tekstowy
-def plik(sciezka):
-    with open(sciezka, 'r') as file:
-        lines = file.readlines()
+    if trans == 'XYZ2BLH':
+        wyniki = self.hirvonen(X, Y, Z)
+        np.savetxt(f"results{trans}_{args.el}.txt", np.column_stack(wyniki), delimiter=' ')
+        return wyniki
 
-    lists = {"1": [], "2": [], "3": []}
-
-    for line in lines:
-        parts = line.split()
-        lists["1"].append(float(parts[0]))
-        lists["2"].append(float(parts[1]))
-        lists["3"].append(float(parts[2]))
-    return lists
 
 
 if __name__ == '__main__':
@@ -180,15 +201,23 @@ if __name__ == '__main__':
     parser.add_argument('-el', type=str)
     parser.add_argument('-t', type=str)
     args = parser.parse_args()
+
     
-
-    if args.el==None:
+    i = 0
+    try:
+        while i == 0:
+           
+            if args.el is None:
                 args.el = input(str('Na jakiej elpisoidzie wykonywane będą obliczenia?: '))
-    if args.wsp==None:
-                args.wsp = plik(input(str('Wklej ścieżkę do pliku txt z danymi: ')))
-    if args.t==None:
+            if args.wsp is None:
+                args.wsp = input(str('Wklej ścieżkę do pliku txt z danymi: '))
+            if args.t is None:
                 args.t = input(str('Jaką transformację chcesz wykonać?: '))
+            obiekt = Transformacje(args.el.upper())
+            dane = obiekt.licz(args.wsp, args.t.upper())
+            print(dane)
+            i= i +1
+            
 
-x = args.wsp["1"]
-y = args.wsp["2"]
-z = args.wsp["3"]
+    finally:
+        print('FIN :)')
