@@ -8,17 +8,24 @@ from math import sin, cos, sqrt, atan, atan2, degrees, radians
 import numpy as np
 from argparse import ArgumentParser
 # Otwórz plik tekstowy
-def plik(sciezka):
+def plik(sciezka, trans):
     with open(sciezka, 'r') as file:
         lines = file.readlines()
 
-    lists = {"1": [], "2": [], "3": []}
-
-    for line in lines:
-        parts = line.split()
-        lists["1"].append(float(parts[0]))
-        lists["2"].append(float(parts[1]))
-        lists["3"].append(float(parts[2]))
+    if trans == 'XYZ2BLH' or trans== 'XYZ2NEUP'or trans=='BLH2XYZ':
+        lists = {"1": [], "2": [], "3": []}
+        for line in lines:
+            parts = line.split()
+            lists["1"].append(float(parts[0]))
+            lists["2"].append(float(parts[1]))
+            lists["3"].append(float(parts[2]))
+            
+    elif trans == 'BL2PL2000'or trans == 'BL2PL1992':
+        lists = {"1": [], "2": []}
+        for line in lines:
+            parts = line.split()
+            lists["1"].append(float(parts[0]))
+            lists["2"].append(float(parts[1]))
     return lists
 
 class Transformacje:
@@ -183,7 +190,7 @@ class Transformacje:
                     
                 return(neu)
    def licz(self, plik_input, trans):
-    dane = plik(plik_input)  # Wczytanie danych z pliku
+    dane = plik(plik_input, trans)  # Wczytanie danych z pliku
     X = dane["1"]
     Y = dane["2"]
     Z = dane["3"]
