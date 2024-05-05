@@ -5,7 +5,7 @@
 # - BL(GRS80, WGS84, ew. Krasowski) -> 1992
 
 from math import sin, cos, tan, sqrt, atan, atan2, radians
-from numpy import array, savetxt, column_stack, dot
+from numpy import array, savetxt, column_stack, vstack, dot
 from argparse import ArgumentParser
 
 
@@ -70,25 +70,6 @@ class Transformacje:
                     lists["3"].append(float(parts[2]))
 
             return lists
-
-    def transpose(self, matrix):
-        return [[matrix[j][i] for j in range(len(matrix))] for i in range(len(matrix[0]))]
-
-    def matrix_multiply(self, matrix1, matrix2):
-        # if len(matrix1[0]) != len(matrix2):
-        #     raise ValueError("Niepoprawne wymiary macierzy do mnożenia")
-
-        result = []
-        for i in range(len(matrix1)):
-            row = []
-            for j in range(len(matrix2[0])):
-                sum_value = 0
-                for k in range(len(matrix2)):
-                    sum_value += matrix1[i][k] * matrix2[k][j]
-                row.append(sum_value)
-            result.append(row)
-
-        return result
 
     def hirvonen(self, X, Y, Z):
         fi_list = []
@@ -218,10 +199,10 @@ class Transformacje:
     def xyz2neup(self, X, Y, Z, X0, Y0, Z0):
         neu_results = []
 
-        fi_list = []
-        l_list = []
+        phi_list = []
+        lam_list = []
         h_list = []
-        for x, y, z, x0, y0, z0 in zip(X, Y, Z, X0, Y0, Z0):
+        for x, y, z in zip(X, Y, Z):
             l = atan2(y, x)
             p = sqrt(x**2 + y**2)
             f = atan(z / (p * (1 - self.e2)))
@@ -234,30 +215,24 @@ class Transformacje:
                 if abs(fs - f) < (0.000001/206265):
                     break
 
-            fi_list.append(f)
-            l_list.append(l)
+            phi_list.append(f)
+            lam_list.append(l)
             h_list.append(h)
-            print(fi_list)
-            print(l_list)
-            print(h_list)
-        for element in fi_list, h_list:
-            R = array([[-sin(f) * cos(l), sin(l), cos(f) * cos(l)],
-                       [-sin(f) * sin(l),  cos(l), cos(f) * sin(l)],
-                       [cos(f), 0, sin(f)]])
+
+        for phi, lam in zip(phi_list, lam_list):
+            R = array([[-sin(phi) * cos(lam), sin(lam), cos(phi) * cos(lam)],
+                       [-sin(phi) * sin(lam),  cos(lam), cos(phi) * sin(lam)],
+                       [cos(phi), 0, sin(phi)]])
             xyz = array([x, y, z]).T
-            xyz0 = array([x0, z0, y0]).T
+            xyz0 = array([X0, Z0, Y0]).T
             xyzt = xyz - xyz0
-            neu = R.T @ xyzt
 
-        neu_results.append(neu)
-
+            neu = R.T @ xyzt.T
+            neu_results.append(neu.T)
         return neu_results
 
     def licz(self, plik_input, trans):
         dane = self.plik(plik_input, trans)  # Wczytanie danych z pliku
-        # X = dane[:,0]
-        # Y = dane[:,1]
-        # Z = dane[:,2]
 
         if trans == 'XYZ2BLH':
             X = dane["1"]
@@ -286,7 +261,7 @@ class Transformacje:
             Z0 = dane["Z0"]
             wyniki = self.xyz2neup(X, Y, Z, X0, Y0, Z0)
             savetxt(f"results{trans}_{args.el}.txt",
-                    column_stack(wyniki), delimiter=' ')
+                    vstack(wyniki), delimiter=' ')
             return wyniki
 
         if trans == 'BL2PL2000':
