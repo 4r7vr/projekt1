@@ -36,6 +36,13 @@ class Transformacje:
         self.e2 = self.e**2
 
     def plik(self, sciezka, trans):
+        
+        """
+        INPUT: przyjmuje plik zewnętrzny oraz parametr trans (string)
+        OUTPUT: zwraca współrzędne z pliku w formie list dostosowywując je do 
+            późniejszej transformacji (np. [X], [Y], [Z])
+
+        """
         with open(sciezka, 'r') as file:
             lines = file.readlines()
 
@@ -72,6 +79,12 @@ class Transformacje:
             return lists
 
     def hirvonen(self, X, Y, Z):
+        
+        """
+        INPUT: przyjmuje współrzędne X, Y, Z - w formie list
+        OUTPUT: zwraca współrzędne fi, lambda, h - w formie list
+
+        """
         fi_list = []
         l_list = []
         h_list = []
@@ -96,6 +109,12 @@ class Transformacje:
         return fi_list, l_list, h_list
 
     def flh2xyz(self, F, L, H):
+        
+        """
+        INPUT: przyjmuje współrzędne fi, lambda, h - w formie list
+        OUTPUT: zwraca współrzędne X, Y, Z - w formie list
+
+        """
         x_list = []
         y_list = []
         z_list = []
@@ -110,6 +129,12 @@ class Transformacje:
         return(x_list, y_list, z_list)
 
     def pl1992(self, f, l):
+        
+        """
+        INPUT: przyjmuje współrzędne fi oraz lambda - w formie list
+        OUTPUT: zwraca współrzędne X, Y w układzie 1992 - w formie list
+
+        """
         results_x92 = []
         results_y92 = []
         for f, l in zip(f, l):
@@ -146,6 +171,12 @@ class Transformacje:
         return results_x92, results_y92
 
     def pl2000(self, f, l):
+        
+        """
+        INPUT: przyjmuje współrzędne fi oraz lambda - w formie list
+        OUTPUT: zwraca współrzędne X, Y w układzie 2000 - w formie list
+
+        """
         results_x2000 = []
         results_y2000 = []
         for f, l in zip(f, l):
@@ -200,12 +231,24 @@ class Transformacje:
         return results_x2000, results_y2000
 
     def Rneu(self, phi, lam):
+        
+        """
+        INPUT: przyjmuje współrzędne fi oraz lambda - w formie list
+        OUTPUT: zwraca macierz obrotu NEU - w formie array
+
+        """
         R = array([[-sin(phi)*cos(lam), -sin(lam), cos(phi)*cos(lam)],
                    [-sin(phi)*sin(lam), cos(lam), cos(phi)*sin(lam)],
                    [cos(phi), 0, sin(phi)]])
         return(R)
 
     def xyz2neup(self, X, Y, Z, X0, Y0, Z0):
+        """
+        INPUT: przyjmuje współrzędne X, Y, Z - w formie list, oraz X0, Y0,
+        Z0 - również w formie list    
+        OUTPUT: zwraca wyniki transformacji NEU w formie array
+
+        """
         neu_results = []
 
         for x0, y0, z0 in zip(X0, Y0, Z0):
@@ -250,6 +293,13 @@ class Transformacje:
         return neu_results
 
     def licz(self, plik_input, trans):
+        
+        """
+        INPUT: przyjmuje plik z zewnątrz oraz parametr trans (string)
+        OUTPUT: zwraca wyniki transformacji wprowadzonej przez użytkownika w 
+        formie listy, a poszczególne funkcje warunkowe zpisują je do pliku
+
+        """
         dane = self.plik(plik_input, trans)  # Wczytanie danych z pliku
 
         if trans == 'XYZ2BLH':
