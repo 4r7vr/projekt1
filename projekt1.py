@@ -95,11 +95,18 @@ class Transformacje:
 
         return fi_list, l_list, h_list
 
-    def flh2xyz(f, l, h, self):
-        N = self.a / sqrt(1 - self.e2 * sin(f)**2)
-        X = (N * cos(f)+h) * cos(l)
-        Y = (N * cos(f)+h) * sin(l)
-        Z = ((N * (1 - self.e2)) + h) * sin(f)
+    def flh2xyz(self, F, L, H):
+        x_list = []
+        y_list = []
+        z_list = []
+        for f, l, h in zip(F, L, H):        
+            N = self.a / sqrt(1 - self.e2 * sin(f)**2)
+            X = (N +h)* cos(f) * cos(l)
+            Y = (N +h) * cos(f) * sin(l)
+            Z = ((N * (1 - self.e2)) + h) * sin(f)
+            x_list.append(X)
+            y_list.append(Y)
+            z_list.append(Z)            
         return(X, Y, Z)
 
     def pl1992(self, f, l):
