@@ -95,35 +95,19 @@ class Transformacje:
 
         return fi_list, l_list, h_list
 
-<<<<<<< Updated upstream
     def flh2xyz(self, F, L, H):
         x_list = []
         y_list = []
         z_list = []
-        for f, l, h in zip(F, L, H):        
+        for f, l, h in zip(F, L, H):
             N = self.a / sqrt(1 - self.e2 * sin(f)**2)
-            X = (N +h)* cos(f) * cos(l)
-            Y = (N +h) * cos(f) * sin(l)
+            X = (N + h) * cos(f) * cos(l)
+            Y = (N + h) * cos(f) * sin(l)
             Z = ((N * (1 - self.e2)) + h) * sin(f)
             x_list.append(X)
             y_list.append(Y)
-            z_list.append(Z)            
-=======
-    def flh2xyz(self, f, l, h):
-        X = []
-        Y = []
-        Z = []
-        for f, l, h in zip(f, l, h):
-            N = self.a / sqrt(1 - self.e2 * sin(f)**2)
-            X1 = (N * cos(f)+h) * cos(l)
-            Y1 = (N * cos(f)+h) * sin(l)
-            Z1 = ((N * (1 - self.e2)) + h) * sin(f)
-            X.append(X1)
-            Y.append(Y1)
-            Z.append(Z1)
-
->>>>>>> Stashed changes
-        return(X, Y, Z)
+            z_list.append(Z)
+        return(x_list, y_list, z_list)
 
     def pl1992(self, f, l):
         results_x92 = []
@@ -192,21 +176,22 @@ class Transformacje:
             t = tan(f)
             ni2 = ep2 * (cos(f)**2)
             N = self.a / sqrt(1 - self.e2 * sin(f)**2)
-    
-            A0 = 1 - (self.e2/4) - (3 * self.e2**2 / 64) - (5 * self.e2**3 / 256)
+
+            A0 = 1 - (self.e2/4) - (3 * self.e2**2 / 64) - \
+                (5 * self.e2**3 / 256)
             A2 = (3/8) * (self.e2 + (self.e2**2 / 4) + (15 * self.e2**3 / 128))
             A4 = (15/256) * (self.e2**2 + ((3 * self.e2**3) / 4))
             A6 = (35 * self.e2**3) / 3072
-    
+
             sigma = self.a * (A0 * f - A2 * sin(2 * f) + A4 *
                               sin(4 * f) - A6 * sin(6 * f))
-    
+
             xgk = sigma + (((delta_l**2 / 2) * N * sin(f) * cos(f)) * (1 + ((delta_l**2 / 12) * (cos(f)**2) * (5 - t**2 + 9 *
                            ni2 + 4 * ni2**2)) + ((delta_l**4 / 360) * (cos(f)**4) * (61 - 58 * t**2 + t**4 + 270 * ni2 - 330 * ni2 * t**2))))
-    
+
             ygk = (delta_l * N * cos(f)) * (1 + ((delta_l**2 / 6) * (cos(f)**2) * (1 - t**2 + ni2)) +
                                             (((delta_l**4 / 120) * (cos(f)**4)) * (5 - (18 * t**2) + t**4 + (14 * ni2) - (58 * ni2 * t**2))))
-    
+
             x2000 = xgk * m
             y2000 = ygk * m + (strefa * 1000000) + 500000
             results_x2000.append(x2000)
