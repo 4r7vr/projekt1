@@ -5,7 +5,7 @@
 # - BL(GRS80, WGS84, ew. Krasowski) -> 1992
 
 from math import sin, cos, tan, sqrt, atan, atan2, radians
-from numpy import array, savetxt, column_stack, vstack, dot
+from numpy import array, savetxt, column_stack, vstack, dot, reshape
 from argparse import ArgumentParser
 
 
@@ -95,6 +95,7 @@ class Transformacje:
 
         return fi_list, l_list, h_list
 
+<<<<<<< Updated upstream
     def flh2xyz(self, F, L, H):
         x_list = []
         y_list = []
@@ -107,6 +108,21 @@ class Transformacje:
             x_list.append(X)
             y_list.append(Y)
             z_list.append(Z)            
+=======
+    def flh2xyz(self, f, l, h):
+        X = []
+        Y = []
+        Z = []
+        for f, l, h in zip(f, l, h):
+            N = self.a / sqrt(1 - self.e2 * sin(f)**2)
+            X1 = (N * cos(f)+h) * cos(l)
+            Y1 = (N * cos(f)+h) * sin(l)
+            Z1 = ((N * (1 - self.e2)) + h) * sin(f)
+            X.append(X1)
+            Y.append(Y1)
+            Z.append(Z1)
+
+>>>>>>> Stashed changes
         return(X, Y, Z)
 
     def pl1992(self, f, l):
@@ -207,36 +223,45 @@ class Transformacje:
     def xyz2neup(self, X, Y, Z, X0, Y0, Z0):
         neu_results = []
 
-        phi_list = []
-        lam_list = []
-        h_list = []
-        for x, y, z in zip(X, Y, Z):
-            l = atan2(y, x)
-            p = sqrt(x**2 + y**2)
-            f = atan(z / (p * (1 - self.e2)))
+        for x0, y0, z0 in zip(X0, Y0, Z0):
+            lam = atan2(y0, x0)
+            p = sqrt(x0**2 + y0**2)
+            phi = atan(z0 / (p * (1 - self.e2)))
 
             while True:
-                N = self.a / sqrt(1 - self.e2 * sin(f)**2)
-                h = p / cos(f) - N
-                fs = f
-                f = atan(z / (p * (1 - (self.e2 * (N / (N + h))))))
-                if abs(fs - f) < (0.000001/206265):
+                N = self.a / sqrt(1 - self.e2 * sin(phi)**2)
+                h = p / cos(phi) - N
+                phi2 = phi
+                phi = atan(z0 / (p * (1 - (self.e2 * (N / (N + h))))))
+                if abs(phi2 - phi) < (0.000001/206265):
                     break
 
-            phi_list.append(f)
-            lam_list.append(l)
-            h_list.append(h)
+        R = array([[-sin(phi) * cos(lam), -sin(lam), cos(phi) * cos(lam)],
+                   [-sin(phi) * sin(lam),  cos(lam), cos(phi) * sin(lam)],
+                   [cos(phi), 0, sin(phi)]])
 
-        for phi, lam in zip(phi_list, lam_list):
-            R = array([[-sin(phi) * cos(lam), sin(lam), cos(phi) * cos(lam)],
-                       [-sin(phi) * sin(lam),  cos(lam), cos(phi) * sin(lam)],
-                       [cos(phi), 0, sin(phi)]])
-            xyz = array([x, y, z]).T
-            xyz0 = array([X0, Z0, Y0]).T
-            xyzt = xyz - xyz0
+        x_list = []
+        y_list = []
+        z_list = []
+        for x, y, z in zip(X, Y, Z):
+            x_list.append(x)
+            y_list.append(y)
+            z_list.append(z)
 
-            neu = R.T @ xyzt.T
-            neu_results.append(neu.T)
+        x_list = array(x_list)
+        y_list = array(y_list)
+        z_list = array(z_list)
+
+        xyz = column_stack([reshape(x_list, (len(x_list), 1)), reshape(
+            y_list, (len(y_list), 1)), reshape(z_list, (len(z_list), 1))])
+
+        xyz0 = array([X0, Y0, Z0]).T
+
+        xyzt = xyz-xyz0
+
+        neu = R.T @ xyzt.T
+        neu_results.append(neu.T)
+
         return neu_results
 
     def licz(self, plik_input, trans):
