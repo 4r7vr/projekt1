@@ -146,47 +146,48 @@ class Transformacje:
             l0 = 0
             strefa = 0
 
-        if l > radians(13.5) and l < radians(16.5):
-            strefa = 5
-            l0 = radians(15)
-        elif l > radians(16.5) and l < radians(19.5):
-            strefa = 6
-            l0 = radians(18)
-        elif l > radians(19.5) and l < radians(22.5):
-            strefa = 7
-            l0 = radians(21)
-        elif l > radians(22.5) and l < radians(25.5):
-            strefa = 8
-            l0 = radians(24)
-        else:
-            print("Punkt poza strefami odwzorowawczymi układu PL-2000")
+            if l > radians(13.5) and l < radians(16.5):
+                strefa = 5
+                l0 = radians(15)
+            elif l > radians(16.5) and l < radians(19.5):
+                strefa = 6
+                l0 = radians(18)
+            elif l > radians(19.5) and l < radians(22.5):
+                strefa = 7
+                l0 = radians(21)
+            elif l > radians(22.5) and l < radians(25.5):
+                strefa = 8
+                l0 = radians(24)
+            else:
+                print("Punkt poza strefami odwzorowawczymi układu PL-2000")
+                continue
 
-        b2 = self.a**2 * (1 - self.e2)
-        ep2 = (self.a**2 - b2) / b2
+            b2 = self.a**2 * (1 - self.e2)
+            ep2 = (self.a**2 - b2) / b2
 
-        delta_l = l - l0
-        t = tan(f)
-        ni2 = ep2 * (cos(f)**2)
-        N = self.a / sqrt(1 - self.e2 * sin(f)**2)
-
-        A0 = 1 - (self.e2/4) - (3 * self.e2**2 / 64) - (5 * self.e2**3 / 256)
-        A2 = (3/8) * (self.e2 + (self.e2**2 / 4) + (15 * self.e2**3 / 128))
-        A4 = (15/256) * (self.e2**2 + ((3 * self.e2**3) / 4))
-        A6 = (35 * self.e2**3) / 3072
-
-        sigma = self.a * (A0 * f - A2 * sin(2 * f) + A4 *
-                          sin(4 * f) - A6 * sin(6 * f))
-
-        xgk = sigma + (((delta_l**2 / 2) * N * sin(f) * cos(f)) * (1 + ((delta_l**2 / 12) * (cos(f)**2) * (5 - t**2 + 9 *
-                       ni2 + 4 * ni2**2)) + ((delta_l**4 / 360) * (cos(f)**4) * (61 - 58 * t**2 + t**4 + 270 * ni2 - 330 * ni2 * t**2))))
-
-        ygk = (delta_l * N * cos(f)) * (1 + ((delta_l**2 / 6) * (cos(f)**2) * (1 - t**2 + ni2)) +
-                                        (((delta_l**4 / 120) * (cos(f)**4)) * (5 - (18 * t**2) + t**4 + (14 * ni2) - (58 * ni2 * t**2))))
-
-        x2000 = xgk * m
-        y2000 = ygk * m + (strefa * 1000000) + 500000
-        results_x2000.append(x2000)
-        results_y2000.append(y2000)
+            delta_l = l - l0
+            t = tan(f)
+            ni2 = ep2 * (cos(f)**2)
+            N = self.a / sqrt(1 - self.e2 * sin(f)**2)
+    
+            A0 = 1 - (self.e2/4) - (3 * self.e2**2 / 64) - (5 * self.e2**3 / 256)
+            A2 = (3/8) * (self.e2 + (self.e2**2 / 4) + (15 * self.e2**3 / 128))
+            A4 = (15/256) * (self.e2**2 + ((3 * self.e2**3) / 4))
+            A6 = (35 * self.e2**3) / 3072
+    
+            sigma = self.a * (A0 * f - A2 * sin(2 * f) + A4 *
+                              sin(4 * f) - A6 * sin(6 * f))
+    
+            xgk = sigma + (((delta_l**2 / 2) * N * sin(f) * cos(f)) * (1 + ((delta_l**2 / 12) * (cos(f)**2) * (5 - t**2 + 9 *
+                           ni2 + 4 * ni2**2)) + ((delta_l**4 / 360) * (cos(f)**4) * (61 - 58 * t**2 + t**4 + 270 * ni2 - 330 * ni2 * t**2))))
+    
+            ygk = (delta_l * N * cos(f)) * (1 + ((delta_l**2 / 6) * (cos(f)**2) * (1 - t**2 + ni2)) +
+                                            (((delta_l**4 / 120) * (cos(f)**4)) * (5 - (18 * t**2) + t**4 + (14 * ni2) - (58 * ni2 * t**2))))
+    
+            x2000 = xgk * m
+            y2000 = ygk * m + (strefa * 1000000) + 500000
+            results_x2000.append(x2000)
+            results_y2000.append(y2000)
 
         return results_x2000, results_y2000
 
@@ -265,16 +266,16 @@ class Transformacje:
             return wyniki
 
         if trans == 'BL2PL2000':
-            X = dane[:, 0]
-            Y = dane[:, 1]
+            X = dane["1"]
+            Y = dane["2"]
             wyniki = self.pl2000(X, Y)
             savetxt(f"results{trans}_{args.el}.txt",
                     column_stack(wyniki), delimiter=' ')
             return wyniki
 
         if trans == 'BL2PL1992':
-            X = dane[:, 0]
-            Y = dane[:, 1]
+            X = dane["1"]
+            Y = dane["2"]
             wyniki = self.pl1992(X, Y)
             savetxt(f"results{trans}_{args.el}.txt",
                     column_stack(wyniki), delimiter=' ')
