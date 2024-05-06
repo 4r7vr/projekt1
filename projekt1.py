@@ -1,9 +1,3 @@
-# - XYZ (geocentryczne) -> BLH (elipsoidalne fi, lambda, h)
-# - BLH -> XYZ
-# - XYZ -> NEUp
-# - BL(GRS80, WGS84, ew. Krasowski) -> 2000
-# - BL(GRS80, WGS84, ew. Krasowski) -> 1992
-
 from math import sin, cos, tan, sqrt, atan, atan2, radians
 from numpy import array, savetxt, column_stack, vstack, dot, reshape
 from argparse import ArgumentParser
@@ -18,7 +12,6 @@ class Transformacje:
             e2 - mimośród^2
         + WGS84: https://en.wikipedia.org/wiki/World_Geodetic_System#WGS84
         + Inne powierzchnie odniesienia: https://en.wikibooks.org/wiki/PROJ.4#Spheroid
-        + Parametry planet: https://nssdc.gsfc.nasa.gov/planetary/factsheet/index.html
         """
         if model == "WGS84":
             self.a = 6378137.0
@@ -36,7 +29,6 @@ class Transformacje:
         self.e2 = self.e**2
 
     def plik(self, sciezka, trans):
-        
         """
         INPUT: przyjmuje plik zewnętrzny oraz parametr trans (string)
         OUTPUT: zwraca współrzędne z pliku w formie list dostosowywując je do 
@@ -46,9 +38,22 @@ class Transformacje:
         with open(sciezka, 'r') as file:
             lines = file.readlines()
 
+        if len(lines) == 1:  # Sprawdzenie, czy plik zawiera tylko jedną linię
+            # Usunięcie znaków białych z początku i końca linii
+            line = lines[0].strip()
+            parts = line.split()
+            if trans == 'XYZ2NEUP':
+                lists = {"1": [float(parts[0])], "2": [float(parts[1])], "3": [float(parts[2])],
+                         "X0": [], "Y0": [], "Z0": []}
+                lists["X0"].append(float(parts[0]))
+                lists["Y0"].append(float(parts[1]))
+                lists["Z0"].append(float(parts[2]))
+            else:
+                lists = {"1": [float(parts[0])], "2": [
+                    float(parts[1])], "3": [float(parts[2])]}
+        else:
             if trans == 'XYZ2BLH' or trans == 'BLH2XYZ':
                 lists = {"1": [], "2": [], "3": []}
-                # lists = []
                 for line in lines:
                     parts = line.split()
                     lists["1"].append(float(parts[0]))
@@ -76,10 +81,9 @@ class Transformacje:
                     lists["2"].append(float(parts[1]))
                     lists["3"].append(float(parts[2]))
 
-            return lists
+        return lists
 
     def hirvonen(self, X, Y, Z):
-        
         """
         INPUT: przyjmuje współrzędne X, Y, Z - w formie list
         OUTPUT: zwraca współrzędne fi, lambda, h - w formie list
@@ -109,7 +113,6 @@ class Transformacje:
         return fi_list, l_list, h_list
 
     def flh2xyz(self, F, L, H):
-        
         """
         INPUT: przyjmuje współrzędne fi, lambda, h - w formie list
         OUTPUT: zwraca współrzędne X, Y, Z - w formie list
@@ -129,7 +132,6 @@ class Transformacje:
         return(x_list, y_list, z_list)
 
     def pl1992(self, f, l):
-        
         """
         INPUT: przyjmuje współrzędne fi oraz lambda - w formie list
         OUTPUT: zwraca współrzędne X, Y w układzie 1992 - w formie list
@@ -171,7 +173,6 @@ class Transformacje:
         return results_x92, results_y92
 
     def pl2000(self, f, l):
-        
         """
         INPUT: przyjmuje współrzędne fi oraz lambda - w formie list
         OUTPUT: zwraca współrzędne X, Y w układzie 2000 - w formie list
@@ -231,7 +232,6 @@ class Transformacje:
         return results_x2000, results_y2000
 
     def Rneu(self, phi, lam):
-        
         """
         INPUT: przyjmuje współrzędne fi oraz lambda - w formie list
         OUTPUT: zwraca macierz obrotu NEU - w formie array
@@ -251,16 +251,16 @@ class Transformacje:
         """
         neu_results = []
 
-        for x0, y0, z0 in zip(X0, Y0, Z0):
-            lam = atan2(y0, x0)
-            p = sqrt(x0**2 + y0**2)
-            phi = atan(z0 / (p * (1 - self.e2)))
+        for X0, Y0, Z0 in zip(X0, Y0, Z0):
+            lam = atan2(Y0, X0)
+            p = sqrt(X0**2 + Y0**2)
+            phi = atan(Z0 / (p * (1 - self.e2)))
 
             while True:
                 N = self.a / sqrt(1 - self.e2 * sin(phi)**2)
                 h = p / cos(phi) - N
                 phi2 = phi
-                phi = atan(z0 / (p * (1 - (self.e2 * (N / (N + h))))))
+                phi = atan(Z0 / (p * (1 - (self.e2 * (N / (N + h))))))
                 if abs(phi2 - phi) < (0.000001/206265):
                     break
 
@@ -268,20 +268,20 @@ class Transformacje:
                    [-sin(phi) * sin(lam),  cos(lam), cos(phi) * sin(lam)],
                    [cos(phi), 0, sin(phi)]])
 
-        x_list = []
-        y_list = []
-        z_list = []
-        for x, y, z in zip(X, Y, Z):
-            x_list.append(x)
-            y_list.append(y)
-            z_list.append(z)
+        X_list = []
+        Y_list = []
+        Z_list = []
+        for X, Y, Z in zip(X, Y, Z):
+            X_list.append(X)
+            Y_list.append(Y)
+            Z_list.append(Z)
 
-        x_list = array(x_list)
-        y_list = array(y_list)
-        z_list = array(z_list)
+        X_list = array(X_list)
+        Y_list = array(Y_list)
+        Z_list = array(Z_list)
 
-        xyz = column_stack([reshape(x_list, (len(x_list), 1)), reshape(
-            y_list, (len(y_list), 1)), reshape(z_list, (len(z_list), 1))])
+        xyz = column_stack([reshape(X_list, (len(X_list), 1)), reshape(
+            Y_list, (len(Y_list), 1)), reshape(Z_list, (len(Z_list), 1))])
 
         xyz0 = array([X0, Y0, Z0]).T
 
@@ -293,7 +293,6 @@ class Transformacje:
         return neu_results
 
     def licz(self, plik_input, trans):
-        
         """
         INPUT: przyjmuje plik z zewnątrz oraz parametr trans (string)
         OUTPUT: zwraca wyniki transformacji wprowadzonej przez użytkownika w 
@@ -351,18 +350,33 @@ class Transformacje:
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument('-wsp', type=str)
-    parser.add_argument('-el', type=str)
-    parser.add_argument('-t', type=str)
+    parser.add_argument(
+        '-el', type=str, help='Przyjmuje nazwe elipsoidy, na której ma zostac wykonana transformacja. Dostepne elipsoidy: WGS84, GRS80, KRASOWSKI')
+    parser.add_argument(
+        '-wsp', type=str, help='Przyjmuje sciezke do pliku ze wspolrzednymi; jezeli plik jest w tym samym folderze co program wystarczy wpisac nazwe pliku z rozszerzeniem')
+    parser.add_argument(
+        '-t', type=str, help='Przyjmuje nazwe transformacji, ktora ma zostac wykonana. Dostepne transformacje: XYZ2BLH, BLH2XYZ, XYZ2NEUP, BL2PL2000, BL2PL1992')
     args = parser.parse_args()
 
-    if args.el is None:
-        args.el = input(
-            'Na jakiej elpisoidzie wykonywane będą obliczenia?: ').upper()
-    if args.wsp is None:
-        args.wsp = input('Wklej ścieżkę do pliku txt z danymi: ')
-    if args.t is None:
-        args.t = input('Jaką transformację chcesz wykonać?: ').upper()
-    obiekt = Transformacje(args.el.upper())
-    dane = obiekt.licz(args.wsp, args.t.upper())
-    print(dane)
+    try:
+        if args.el is None:
+            args.el = input(
+                'Na jakiej elpisoidzie wykonywane będą obliczenia?: ').upper()
+        if args.wsp is None:
+            args.wsp = input('Wklej ścieżkę do pliku txt z danymi: ')
+        if args.t is None:
+            args.t = input('Jaką transformację chcesz wykonać?: ').upper()
+
+        obiekt = Transformacje(args.el.upper())
+        dane = obiekt.licz(args.wsp, args.t.upper())
+
+    except FileNotFoundError:
+        print('Podany plik nie istnieje.')
+    except KeyError:
+        print('Nieprawidlowa elipsoida lub transformacja.')
+    except IndexError:
+        print('Nieprawidlowy format danych w pliku.')
+    except ValueError:
+        print('Nieprawidlowy format danych w pliku.')
+    finally:
+        print('Koniec obliczen')
