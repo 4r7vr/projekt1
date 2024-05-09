@@ -41,12 +41,12 @@ Po poprawnym wprowadzeniu wszystkich niezbędnych danych w folderze z programem 
 * wejściowy: wsp.txt
 * wyjściowy: resultsXYZ2BLH_GRS80.txt
 
-##Przykładowe wywołanie pliku za pomocą wiersza poleceń:
+### Przykładowe wywołanie pliku za pomocą wiersza poleceń:
 * użytkownik musi znaleźć się w folderze w którym zapisany jest program
 np.: C:\Users\User\Desktop\all\informatyka sem.4\git projekt 1>
 * następnie w konsoli wpisuje polecenie wybierając odpowiednie opcje - py `nazwa projektu` -el `nazwa elipsoidy` -wsp `plik ze współrzędnymi` -t `nazwa transformacji` (nazwy zarówno transformacji jak i elipsoid możliwych do użycia w obliczeniach podane zostały wyżej)
 np.: py projekt1.py -el grs80 -wsp wsp.txt -t xyz2blh
 
-## Problemy w programie 
+## Uwagi dotyczące pliku wejściowego
 Plik ze współrzędnymi, który użytkownik wgrywa, nie może posiadać nagłówka, ponieważ program nie da rady go odczytać. (ze względu na brak flagi z zapytaniem o ilość linijek nagłówka)
 

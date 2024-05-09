@@ -83,7 +83,7 @@ class Transformacje:
 
         return lists
 
-    def hirvonen(self, X, Y, Z):
+    def xyz2flh(self, X, Y, Z):
         """
         INPUT: przyjmuje współrzędne X, Y, Z - w formie list
         OUTPUT: zwraca współrzędne fi, lambda, h - w formie list
@@ -305,7 +305,7 @@ class Transformacje:
             X = dane["1"]
             Y = dane["2"]
             Z = dane["3"]
-            wyniki = self.hirvonen(X, Y, Z)
+            wyniki = self.xyz2flh(X, Y, Z)
             savetxt(f"results{trans}_{args.el}.txt",
                     column_stack(wyniki), delimiter=' ')
             return wyniki
