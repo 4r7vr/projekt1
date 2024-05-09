@@ -379,4 +379,6 @@ if __name__ == '__main__':
     except ValueError:
         print('Nieprawidlowy format danych w pliku.')
     finally:
-        print('Koniec obliczen')
+        nazwa_pliku = f"results{args.t.upper()}_{args.el.upper()}.txt"
+        print('Transformacja zakończona pomyślnie - dane zapisane do pliku:', 
+              nazwa_pliku)
