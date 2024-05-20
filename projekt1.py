@@ -1,4 +1,4 @@
-from math import sin, cos, tan, sqrt, atan, atan2, radians
+from math import sin, cos, tan, sqrt, atan, atan2, radians, pi
 from numpy import array, savetxt, column_stack, vstack, dot, reshape
 from argparse import ArgumentParser
 
@@ -106,8 +106,8 @@ class Transformacje:
                 if abs(fs - f) < (0.000001/206265):
                     break
 
-            fi_list.append(f)
-            l_list.append(l)
+            fi_list.append((f)*(180/pi))
+            l_list.append((l)*(180/pi))
             h_list.append(h)
 
         return fi_list, l_list, h_list
@@ -121,7 +121,10 @@ class Transformacje:
         x_list = []
         y_list = []
         z_list = []
+
         for f, l, h in zip(F, L, H):
+            f = f * (pi/180)
+            l = l * (pi/180)
             N = self.a / sqrt(1 - self.e2 * sin(f)**2)
             X = (N + h) * cos(f) * cos(l)
             Y = (N + h) * cos(f) * sin(l)
@@ -139,7 +142,10 @@ class Transformacje:
         """
         results_x92 = []
         results_y92 = []
+
         for f, l in zip(f, l):
+            f = f*(pi/180)
+            l = l*(pi/180)
             l0 = radians(19)
             m = 0.9993
             N = self.a / sqrt(1 - self.e2 * sin(f)**2)
@@ -180,7 +186,10 @@ class Transformacje:
         """
         results_x2000 = []
         results_y2000 = []
+
         for f, l in zip(f, l):
+            f = f*(pi/180)
+            l = l*(pi/180)
             m = 0.999923
             l0 = 0
             strefa = 0
@@ -237,6 +246,7 @@ class Transformacje:
         OUTPUT: zwraca macierz obrotu NEU - w formie array
 
         """
+
         R = array([[-sin(phi)*cos(lam), -sin(lam), cos(phi)*cos(lam)],
                    [-sin(phi)*sin(lam), cos(lam), cos(phi)*sin(lam)],
                    [cos(phi), 0, sin(phi)]])
@@ -307,7 +317,7 @@ class Transformacje:
             Z = dane["3"]
             wyniki = self.xyz2flh(X, Y, Z)
             savetxt(f"results{trans}_{args.el}.txt",
-                    column_stack(wyniki), delimiter=' ')
+                    column_stack(wyniki), fmt='%.6f', delimiter=' ')
             return wyniki
 
         if trans == 'BLH2XYZ':
@@ -316,7 +326,7 @@ class Transformacje:
             Z = dane["3"]
             wyniki = self.flh2xyz(X, Y, Z)
             savetxt(f"results{trans}_{args.el}.txt",
-                    column_stack(wyniki), delimiter=' ')
+                    column_stack(wyniki), fmt='%.4f', delimiter=' ')
             return wyniki
 
         if trans == 'XYZ2NEUP':
@@ -328,7 +338,7 @@ class Transformacje:
             Z0 = dane["Z0"]
             wyniki = self.xyz2neup(X, Y, Z, X0, Y0, Z0)
             savetxt(f"results{trans}_{args.el}.txt",
-                    vstack(wyniki), delimiter=' ')
+                    vstack(wyniki),fmt='%.4f', delimiter=' ')
             return wyniki
 
         if trans == 'BL2PL2000':
@@ -336,7 +346,7 @@ class Transformacje:
             Y = dane["2"]
             wyniki = self.pl2000(X, Y)
             savetxt(f"results{trans}_{args.el}.txt",
-                    column_stack(wyniki), delimiter=' ')
+                    column_stack(wyniki),fmt='%.4f', delimiter=' ')
             return wyniki
 
         if trans == 'BL2PL1992':
@@ -344,7 +354,7 @@ class Transformacje:
             Y = dane["2"]
             wyniki = self.pl1992(X, Y)
             savetxt(f"results{trans}_{args.el}.txt",
-                    column_stack(wyniki), delimiter=' ')
+                    column_stack(wyniki),fmt='%.4f' delimiter=' ')
             return wyniki
 
 
