@@ -354,7 +354,7 @@ class Transformacje:
             Y = dane["2"]
             wyniki = self.pl1992(X, Y)
             savetxt(f"results{trans}_{args.el}.txt",
-                    column_stack(wyniki),fmt='%.4f' delimiter=' ')
+                    column_stack(wyniki),fmt='%.4f', delimiter=' ')
             return wyniki
 
 
